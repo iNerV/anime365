@@ -4,19 +4,7 @@ import urllib
 import json
 import time
 import requests
-from settings import token, password, nickname
-
-
-def get_token():
-    # req = "http://shikimori.org/api/access_token"
-    req = 'http://httpbin.org/post'
-    data = urllib.parse.urlencode({
-        'nickname': nickname,
-        'password': password})
-    binary_data = data.encode('utf8')
-    req2 = urllib.request.Request(req, binary_data)
-    param = urllib.request.urlopen(req2)
-    return json.loads(param.read().decode())
+from settings import token, nickname
 
 
 def get_recent_translations_json():
