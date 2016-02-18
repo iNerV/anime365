@@ -3,11 +3,9 @@ import urllib.parse
 import urllib
 import urllib.error
 import json
-import sqlite3
 import time
 import requests
-import random
-from settings import token, password, nickname
+from settings import token, nickname
 
 
 def get_all_translations_json(offset):  # получить ВСЕ переводы

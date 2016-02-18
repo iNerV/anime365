@@ -2,10 +2,8 @@ import urllib.request
 import urllib.parse
 import urllib
 import json
-import sqlite3
 import time
 import requests
-import random
 from settings import token, password, nickname
 
 
