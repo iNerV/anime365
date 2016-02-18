@@ -7,7 +7,7 @@ import all_translations
 
 
 while True:
-    # try:
+    try:
         con = sqlite3.connect('anime365.db')
         anime365.run(con)
         all_translations.run(con)
@@ -15,7 +15,7 @@ while True:
         print('ok')
         print(random.random())
         time.sleep(5)
-    # except urllib.error.HTTPError:
-    #     print('500!!!!!!!!!')
-    # except Exception:
-    #     continue
+    except urllib.error.HTTPError:
+        print('500!!!!!!!!!')
+    except Exception:
+        continue

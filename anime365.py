@@ -58,7 +58,7 @@ def check_quality(qt):
     elif qt == 'bd':
         return '(BD) '
     elif qt == 'dvd':
-        return '(DVD '
+        return '(DVD) '
     else:
         return ''
 
