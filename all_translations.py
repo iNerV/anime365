@@ -93,35 +93,6 @@ def get_all_translations(conn, offset):  # получить ВСЕ перево�
                 get_all_translations(conn, offset + 1)
 
 
-def get_shiki_video(mal_id):
-    print("get_shiki_video")
-    req = 'http://shikimori.org/api/animes/{id}/anime_videos'.format(id=mal_id)
-    headers = {'X-User-Nickname': nickname,
-               'X-User-Api-Access-Token': token}
-    req2 = urllib.request.Request(req, headers=headers)
-    param = urllib.request.urlopen(req2)
-    return json.loads(param.read().decode())
-
-
-def get_video_url_shiki(mal_id):
-    print('get_video_url_shiki')
-    urls = []
-    for url in get_shiki_video(mal_id):
-        urls.append(url['url'])
-    return urls
-
-
-def compare_urls(anime365, mal_id):  # Выпилить нахер, все равно не нужна
-    print('compare_urls')
-    s = 'https://smotret-anime.ru/translations/embed/'
-    if s+str(anime365) in get_video_url_shiki(mal_id):
-        print('Compare FALSE')
-        return True
-    else:
-        print('Compare TRUE')
-        return True
-
-
 def check_quality(qt):
     if qt == 'tv':
         return '(TV) '
@@ -207,16 +178,15 @@ def prepare_video_shiki(conn):
     for dbd in c.fetchall():
         db.append(dbd)
     for x in db:
-        if compare_urls(x[6], x[0]):
-            post_video_shiki(x[0],
-                             x[3],
-                             x[5],
-                             x[1],
-                             x[2],
-                             x[4],
-                             x[4],
-                             conn,
-                             x[8])
+        post_video_shiki(x[0],
+                         x[3],
+                         x[5],
+                         x[1],
+                         x[2],
+                         x[4],
+                         x[4],
+                         conn,
+                         x[8])
         time.sleep(1)
     return db
 
