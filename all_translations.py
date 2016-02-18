@@ -37,7 +37,7 @@ def get_all_translations(conn, offset):  # получить ВСЕ перево�
                   WHERE (anime365_id LIKE ?)", (translations['id'],))
         db = c.fetchall()
         if len(db) > 0:
-            print('DB!')
+            print('Есть в базе!')
             get_all_translations(conn, offset + 1)
         else:
             try:
