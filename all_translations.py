@@ -15,7 +15,8 @@ def get_all_translations_json(offset):  # получить ВСЕ перевод
     data = urllib.parse.urlencode({
         'limit': 1,
         'offset': offset,
-        'pretty': '1'})
+        'pretty': '1',
+        'feed': 'id'})
     binary_data = data.encode('utf8')
     req2 = urllib.request.Request(req)
     param = urllib.request.urlopen(req2, binary_data)
@@ -88,30 +89,20 @@ def get_all_translations(conn, offset):  # получить ВСЕ перево�
                                translations['qualityType'],
                                offset))
                     conn.commit()
-            except (TypeError, ZeroDivisionError):
-                print('TypeError, ZeroDivisionError')
+            except (TypeError, ZeroDivisionError, ValueError):
+                print('TypeError, ZeroDivisionError, ValueError')
                 get_all_translations(conn, offset + 1)
 
 
 def check_quality(qt):
     if qt == 'tv':
-        return '(TV) '
+        return 'tv'
     elif qt == 'bd':
-        return '(BD) '
+        return 'bd'
     elif qt == 'dvd':
-        return '(DVD) '
+        return 'dvd'
     else:
-        return ''
-
-
-def check_lang(lang, kind):
-    print('lang')
-    if lang == 'english' and kind == 'subtitles':
-        return ' (Английские субтитры)'
-    elif lang == 'japanese' and kind == 'subtitles':
-        return ' (Японские субтитры)'
-    else:
-        return ''
+        return 'unknown'
 
 
 def post_video_shiki(anime_id,
@@ -142,20 +133,28 @@ def post_video_shiki(anime_id,
     elif language == '':
         language = 'unknown'
 
+    if quality_type == 'tv':
+        quality_type = 'tv'
+    elif quality_type == 'bd':
+        quality_type = 'bd'
+    elif quality_type == 'dvd':
+        quality_type = 'dvd'
+    else:
+        quality_type = 'unknown'
+
     c = conn.cursor()
     link = 'http://shikimori.org/api/animes/{id}/anime_videos'
     req = link.format(id=anime_id)
     # req = 'http://httpbin.org/post'
     anime_video = {'anime_id': int(anime_id),
                    "state": "uploaded",
-                   'author_name': str(check_quality(quality_type) +
-                                      author_name +
-                                      check_lang(language, kind)),
+                   'author_name': str(author_name),
                    'episode': int(episode),
                    'kind': str(kind),
                    'language': str(language),
                    'source': str(source),
-                   'url': str(url)}
+                   'url': str(url),
+                   'quality': str(check_quality(quality_type))}
     data = {'anime_video': anime_video}
     headers = {'X-User-Nickname': nickname,
                'X-User-Api-Access-Token': token,

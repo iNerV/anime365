@@ -52,27 +52,6 @@ def get_recent_translations(conn):
             conn.commit()
 
 
-def check_quality(qt):
-    if qt == 'tv':
-        return '(TV) '
-    elif qt == 'bd':
-        return '(BD) '
-    elif qt == 'dvd':
-        return '(DVD) '
-    else:
-        return ''
-
-
-def check_lang(lang, kind):
-    print('lang')
-    if lang == 'english' and kind == 'subtitles':
-        return ' (Английские субтитры)'
-    elif lang == 'japanese' and kind == 'subtitles':
-        return ' (Японские субтитры)'
-    else:
-        return ''
-
-
 def post_video_shiki(anime_id,
                      author_name,
                      episode,
@@ -101,20 +80,28 @@ def post_video_shiki(anime_id,
     elif language == '':
         language = 'unknown'
 
+    if quality_type == 'tv':
+        quality_type = 'tv'
+    elif quality_type == 'bd':
+        quality_type = 'bd'
+    elif quality_type == 'dvd':
+        quality_type = 'dvd'
+    else:
+        quality_type = 'unknown'
+
     c = conn.cursor()
     link = 'http://shikimori.org/api/animes/{id}/anime_videos'
     req = link.format(id=anime_id)
     # req = 'http://httpbin.org/post'
     anime_video = {'anime_id': int(anime_id),
                    "state": "uploaded",
-                   'author_name': str(check_quality(quality_type) +
-                                      author_name +
-                                      check_lang(language, kind)),
+                   'author_name': str(author_name),
                    'episode': int(episode),
                    'kind': str(kind),
                    'language': str(language),
                    'source': str(source),
-                   'url': str(url)}
+                   'url': str(url),
+                   'quality': str(quality_type)}
     data = {'anime_video': anime_video}
     headers = {'X-User-Nickname': nickname,
                'X-User-Api-Access-Token': token,

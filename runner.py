@@ -14,7 +14,7 @@ while True:
         con.close()
         print('ok')
         print(random.random())
-        time.sleep(5)
+        time.sleep(1)
     except urllib.error.HTTPError:
         print('500!!!!!!!!!')
     except Exception:
