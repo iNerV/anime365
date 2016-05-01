@@ -19,9 +19,37 @@ def get_recent_translations_json():
     return json.loads(param.read().decode())['data']
 
 
+def add_to_db(translations, conn):
+    c = conn.cursor()
+    c.execute('INSERT INTO recent_translations (mal_id, \
+                                  typeKind, \
+                                  typeLang,\
+                                  authorsSummary,\
+                                  url,\
+                                  episodeInt, \
+                                  anime365_id, \
+                                  uploaded, \
+                                  qualityType) \
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+              (translations['series']['myAnimeListId'],
+               translations['typeKind'],
+               translations['typeLang'],
+               translations['authorsSummary'],
+               translations['url'],
+               translations['episode']['episodeInt'],
+               translations['id'],
+               0,
+               translations['qualityType']))
+    conn.commit()
+
+
 def get_recent_translations(conn):
     print('get_recent_translations')
     c = conn.cursor()
+    allow_type = ['tv', 'ova', 'ona', 'movie', 'special']
+    headers = {'X-User-Nickname': nickname,
+               'X-User-Api-Access-Token': token,
+               'content-type': 'application/json'}
     for translations in get_recent_translations_json():
         c.execute("SELECT * \
                   FROM recent_translations \
@@ -30,26 +58,56 @@ def get_recent_translations(conn):
         if len(db) > 0:
             pass
         else:
-            c.execute('INSERT INTO recent_translations (mal_id, \
-                      typeKind, \
-                      typeLang,\
-                      authorsSummary,\
-                      url,\
-                      episodeInt, \
-                      anime365_id, \
-                      uploaded, \
-                      qualityType) \
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                      (translations['series']['myAnimeListId'],
-                       translations['typeKind'],
-                       translations['typeLang'],
-                       translations['authorsSummary'],
-                       translations['url'],
-                       translations['episode']['episodeInt'],
-                       translations['id'],
-                       0,
-                       translations['qualityType']))
-            conn.commit()
+            time.sleep(1)
+            print('test')
+            req = 'https://shikimori.org/api/animes/{anime_id}'.format(anime_id=translations['series']['myAnimeListId'])
+            response = requests.get(req, headers=headers).json()
+            # print(translations['id'])
+            # print(int(float(translations['episode']['episodeInt'])))
+            if response.get('code', 200) == 404:
+                print('error 404')
+                continue
+            elif translations['isActive'] == -1:
+                print('isActive -1')
+            elif translations['isActive'] == 0:
+                print('isActive 0')
+            elif translations['isActive'] == '0':
+                print('isActive 0')
+            elif translations['episode']['episodeInt'] == '':
+                print('episode')
+            elif translations['episode']['episodeInt'] == '0':
+                print('episode #0')
+            elif float(translations['episode']['episodeInt']) / int(float(translations['episode']['episodeInt'])) != 1:
+                print('дробный эпизод')
+            elif translations['series']['myAnimeListId'] == 0:
+                print('MAL id')
+            elif translations['typeKind'] == '':
+                print('Typekind')
+            elif translations['typeLang'] == '':
+                print('typelang')
+            elif translations['episode']['episodeType'] not in allow_type:
+                print('allow_type')
+            elif response['anons']:
+                print('anons')
+            elif response['episodes'] != 0 and response['episodes'] < int(float(translations['episode']['episodeInt'])):
+                print('episodes')
+                print(response['episodes'], int(float(translations['episode']['episodeInt'])))
+            elif response['episodes_aired'] + 4 < int(translations['episode']['episodeInt']) \
+                    and response['episodes_aired'] != 0:
+                print('episodes_aired')
+                print(response['episodes_aired'], int(translations['episode']['episodeInt']))
+                print(translations['series']['myAnimeListId'])
+            elif response['kind'] != translations['episode']['episodeType']:
+                print('kind')
+            else:
+                if translations['duration'] != '0' and response['duration'] != 0:
+                    if float(translations['duration']) < (
+                                (response['duration'] * 60) - ((response['duration'] * 60) / 3)):
+                        print('duration')
+                    else:
+                        add_to_db(translations, conn)
+                else:
+                    add_to_db(translations, conn)
 
 
 def post_video_shiki(anime_id,
@@ -76,7 +134,7 @@ def post_video_shiki(anime_id,
     elif language == 'en':
         language = 'english'
     elif language == 'jp':
-        language = 'japanese'
+        language = 'original'
     elif language == '':
         language = 'unknown'
 
@@ -110,6 +168,7 @@ def post_video_shiki(anime_id,
     c.execute('UPDATE recent_translations \
         SET uploaded=? WHERE url=?', (1, url))
     conn.commit()
+    print(param.text)
     return param.text
 
 
@@ -137,5 +196,5 @@ def prepare_video_shiki(conn):
 
 
 def run(conn):
-        get_recent_translations(conn)
-        prepare_video_shiki(conn)
+    get_recent_translations(conn)
+    prepare_video_shiki(conn)
