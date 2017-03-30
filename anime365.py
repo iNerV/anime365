@@ -6,15 +6,19 @@ import time
 import requests
 from settings import token, nickname
 
+USER_AGENT = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'}
+
 
 def get_recent_translations_json():
     print('get_recent_translations_json')
-    req = "http://smotret-anime.ru/api/translations/?"
+    req = "https://smotret-anime.ru/api/translations/?"
     data = urllib.parse.urlencode({
         'feed': 'recent',
-        'pretty': '1'})
+        'pretty': '1',
+        #  'limit': '1000'
+    })
     binary_data = data.encode('utf8')
-    req2 = urllib.request.Request(req)
+    req2 = urllib.request.Request(req, headers=USER_AGENT)
     param = urllib.request.urlopen(req2, binary_data)
     return json.loads(param.read().decode())['data']
 
@@ -66,7 +70,7 @@ def get_recent_translations(conn):
             # print(int(float(translations['episode']['episodeInt'])))
             if response.get('code', 200) == 404:
                 print('error 404')
-                continue
+                # continue
             elif translations['isActive'] == -1:
                 print('isActive -1')
             elif translations['isActive'] == 0:
@@ -137,6 +141,8 @@ def post_video_shiki(anime_id,
         language = 'original'
     elif language == '':
         language = 'unknown'
+    else:
+        language = 'unknown'
 
     if quality_type == 'tv':
         quality_type = 'tv'
@@ -148,9 +154,9 @@ def post_video_shiki(anime_id,
         quality_type = 'unknown'
 
     c = conn.cursor()
-    link = 'http://shikimori.org/api/animes/{id}/anime_videos'
+    link = 'https://shikimori.org/api/animes/{id}/anime_videos'
     req = link.format(id=anime_id)
-    # req = 'http://httpbin.org/post'
+    # req = 'https://httpbin.org/post'
     anime_video = {'anime_id': int(anime_id),
                    "state": "uploaded",
                    'author_name': str(author_name),

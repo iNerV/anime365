@@ -55,12 +55,26 @@ def get_duration(conn):
         time.sleep(0.7)
 
 
+def get_kind(conn):
+    c = conn.cursor()
+    headers = {'X-User-Nickname': nickname,
+               'X-User-Api-Access-Token': token,
+               'content-type': 'application/json'}
+    c.execute("SELECT anime_id FROM all_my_videos WHERE check_anime='FALSE'",)
+    x = c.fetchone()
+    req = 'https://shikimori.org/api/animes/{anime_id}'.format(anime_id=x[0])
+    response = requests.get(req, headers=headers).json()
+    c.execute("UPDATE all_my_videos SET kind=?, check_anime='TRUE' WHERE anime_id=?", (response['kind'], x[0]))
+    print(x[0])
+    conn.commit()
+
+
 def delete_video(conn):
     c = conn.cursor()
     headers = {'X-User-Nickname': nickname,
                'X-User-Api-Access-Token': token,
                'content-type': 'application/json'}
-    c.execute("SELECT url, anime_id, video_id, ep_duration FROM all_my_videos WHERE check_anime='FALSE'")
+    c.execute("SELECT url, anime_id, video_id, ep_duration, kind FROM all_my_videos WHERE check_anime='FALSE'")
     db = c.fetchall()
     for x in db:
         try:
@@ -70,7 +84,7 @@ def delete_video(conn):
             allow_type = ['tv', 'ova', 'ona', 'movie', 'special']
             if 'error' in resp:
                 time.sleep(0.7)
-                r = requests.delete('https://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
+                r = requests.delete('http://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
                                     .format(anime_id=x[1], video_id=x[2]), headers=headers).text
                 c.execute('INSERT INTO delete_broken (anime_id, \
                                                       video_id, \
@@ -81,7 +95,7 @@ def delete_video(conn):
                            x[0]))
             elif resp['data']['episode'] is None:
                 time.sleep(0.7)
-                r = requests.delete('https://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
+                r = requests.delete('http://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
                                     .format(anime_id=x[1], video_id=x[2]), headers=headers).text
                 c.execute('INSERT INTO delete_broken (anime_id, \
                                                       video_id, \
@@ -93,7 +107,7 @@ def delete_video(conn):
 
             elif resp['data']['episode']['episodeType'] not in allow_type:
                 time.sleep(0.7)
-                r = requests.delete('https://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
+                r = requests.delete('http://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
                                     .format(anime_id=x[1], video_id=x[2]), headers=headers).text
                 c.execute('INSERT INTO delete_broken (anime_id, \
                                                       video_id, \
@@ -105,7 +119,7 @@ def delete_video(conn):
             elif resp['data']['duration'] != '0' and x[3] != 0:
                 if float(resp['data']['duration']) < ((x[3]*60)-((x[3]*60)/3)):
                     time.sleep(0.7)
-                    r = requests.delete('https://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
+                    r = requests.delete('http://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
                                         .format(anime_id=x[1], video_id=x[2]), headers=headers).text
                     c.execute('INSERT INTO delete_broken (anime_id, \
                                                           video_id, \
@@ -116,7 +130,18 @@ def delete_video(conn):
                                x[0]))
             elif resp['data']['isActive'] != 1:
                 time.sleep(0.7)
-                r = requests.delete('https://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
+                r = requests.delete('http://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
+                                    .format(anime_id=x[1], video_id=x[2]), headers=headers).text
+                c.execute('INSERT INTO delete_broken (anime_id, \
+                                                      video_id, \
+                                                      url) \
+                          VALUES (?, ?, ?)',
+                          (x[1],
+                           x[2],
+                           x[0]))
+            elif resp['data']['episode']['episodeType'] != x[4]:
+                time.sleep(0.7)
+                r = requests.delete('http://shikimori.org/api/animes/{anime_id}/anime_videos/{video_id}'
                                     .format(anime_id=x[1], video_id=x[2]), headers=headers).text
                 c.execute('INSERT INTO delete_broken (anime_id, \
                                                       video_id, \
@@ -131,9 +156,6 @@ def delete_video(conn):
         except (SSLError, ConnectionError, JSONDecodeError):
             delete_video(conn)
 
-
-def run():
+if __name__ == '__main__':
     con = sqlite3.connect('anime365.db')
     delete_video(con)
-
-run()

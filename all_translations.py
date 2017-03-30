@@ -181,6 +181,8 @@ def post_video_shiki(anime_id,
         language = 'original'
     elif language == '':
         language = 'unknown'
+    else:
+        language = 'unknown'
 
     if quality_type == 'tv':
         quality_type = 'tv'
