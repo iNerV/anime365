@@ -4,6 +4,105 @@ import datetime
 import requests
 from settings import token, nickname
 
+"""
+class Validator:
+    # ALLOW_TYPE = ['tv', 'ova', 'ona', 'movie', 'special']
+    ALLOW_TYPE_OP_ED = ['ending', 'opening', 'preview']
+
+    def __init__(self, anime_info, video_info, allow_type=None):
+        if allow_type is None:
+            self.ALLOW_TYPE = ['tv', 'ova', 'ona', 'movie', 'special']
+        else:
+            self.ALLOW_TYPE = allow_type
+        self.ALLOW_TYPE = allow_type
+
+        self.anime_info = anime_info
+        self.video_info = video_info
+
+        self.validators = [self._is_aired_episode(), self._check_duration(), self._is_allow_type(),
+                           self._is_active(), self._has_kind(), self._has_lang(), self._check_number_of_episode()]
+
+    def validate(self) -> bool:
+        print('_validate')
+        if self._has_mal_id():
+            if self._is_404() or self._is_anons():  # fixme op/ed/pv не пройдут
+                return False
+            if all(self.validators):
+                return True
+        return False
+
+    def _is_404(self) -> bool:
+        print('_is_404')
+        if self.anime_info.get('code', 200) == 404:
+            return True
+        return False
+
+    def _is_anons(self) -> bool:
+        print('_is_anons')
+        if self.anime_anons:
+            return True
+        return False
+
+    def _is_aired_episode(self) -> bool:
+        print('_is_aired_episode')
+        if self.episodes_aired + 2 < int(float(self.episode)) and self.episodes_aired != 0:
+            return False
+        return True
+
+    def _check_duration(self) -> bool:
+        print('_check_duration')
+        if self.episode_duration != '0' and self.episode_duration != 0:
+            duration_in_minutes = self.anime_duration * 60
+            if float(self.episode_duration) < (duration_in_minutes - (duration_in_minutes / 3)):
+                return False
+            else:
+                return True
+        return False
+
+    def _is_allow_type(self) -> bool:
+        print('_is_allow_type')
+        if self.episode_type not in self.ALLOW_TYPE:
+            return False
+        return True
+
+    def _is_active(self) -> bool:
+        print('_is_active')
+        if self.episode_active != 1:
+            return False
+        return True
+
+    def _has_mal_id(self) -> bool:
+        print('_has_mal_id')
+        if self.episode_mal_id == 0:
+            return False
+        return True
+
+    def _has_kind(self) -> bool:
+        print('_has_kind')
+        if self.episode_kind == '':
+            return False
+        return True
+
+    def _check_kind(self) -> bool:
+        print('_check_kind')
+        if self.anime_kind != self.episode_type:
+            return False
+        return True
+
+    def _has_lang(self) -> bool:
+        print('_has_lang')
+        if self.episode_lang == '':
+            return False
+        return True
+
+    def _check_number_of_episode(self) -> bool:
+        print('_check_number_of_episode')
+        if self.episode == '' or self.episode == '0':
+            return False
+        elif float(self.episode) / int(float(self.episode)) != 1:
+            return False
+        return True
+"""
 
 class Bot(object):
     ALLOW_TYPE = ['tv', 'ova', 'ona', 'movie', 'special']
