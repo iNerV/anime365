@@ -123,6 +123,71 @@ class Anime:
     @property
     def is_aired(self) -> bool:
         return self.anime_info['episodes_aired']
+
+
+class Episode:
+    def __init__(self, video_info):
+        self.video_info = video_info
+        self.kind = self.video_info['typeKind']
+        self.lang = self.video_info['typeLang']
+        self.quality = self.video_info['qualityType']
+        self.type = self.video_info['episode']['episodeType']
+
+    @property
+    def get_id(self):
+        return self.video_info['id']
+
+    @property
+    def get_quality(self):
+        return self.quality
+
+    @property
+    def get_author(self):
+        return self.video_info['authorsSummary']
+
+    @property
+    def get_url(self):
+        return self.video_info['embedUrl']
+
+    @property
+    def get_number(self):
+        return self.video_info['episode']['episodeInt']
+
+    @property
+    def get_duration(self):
+        return self.video_info['duration']
+
+    @property
+    def get_type(self):
+        return self.type
+
+    @property
+    def get_kind(self):
+        return self.kind
+
+    @property
+    def get_lang(self):
+        return self.lang
+
+    @property
+    def get_mal_id(self):
+        return self.video_info['series']['myAnimeListId']
+
+    @property
+    def is_active(self):
+        return self.video_info['isActive']
+
+    def set_lang(self, new_lang):
+        self.lang = new_lang
+
+    def set_kind(self, new_kind):
+        self.kind = new_kind
+
+    def set_type(self, new_type):
+        self.type = new_type
+
+    def set_quality(self, new_quality):
+        self.quality = new_quality
 """
 
 class Bot(object):
