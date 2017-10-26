@@ -102,6 +102,27 @@ class Validator:
         elif float(self.episode) / int(float(self.episode)) != 1:
             return False
         return True
+
+
+class Anime:
+    def __init__(self, anime_info):
+        self.anime_info = anime_info
+
+    @property
+    def get_kind(self) -> str:
+        return self.anime_info['kind']
+
+    @property
+    def get_duration(self) -> str:
+        return self.anime_info['duration']
+
+    @property
+    def is_anons(self) -> bool:
+        return self.anime_info['anons']
+
+    @property
+    def is_aired(self) -> bool:
+        return self.anime_info['episodes_aired']
 """
 
 class Bot(object):
