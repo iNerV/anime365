@@ -188,6 +188,83 @@ class Episode:
 
     def set_quality(self, new_quality):
         self.quality = new_quality
+
+
+class Loader:
+    USER_AGENT = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'}
+
+    def __init__(self, url, payload=None):
+        self.url = url
+        self.payload = payload
+
+    def fetch_data(self):
+        response = requests.get(self.url, params=self.payload, headers=self.USER_AGENT).json()
+        return response
+
+
+class New_Bot:
+    SMORET_ANIME_API_URL = "https://smotret-anime.ru/api/translations/?"
+    SHIKIMORI_API_URL = 'https://shikimori.org/api/animes/'
+
+    def recent(self):
+        translations = Loader(self.SMORET_ANIME_API_URL, payload={'feed': 'recent', 'limit': 50}).fetch_data()['data']
+        for translation in translations:
+            episode = Episode(translation)
+            time.sleep(0.7)
+            anime = Loader(self.SHIKIMORI_API_URL + episode.get_mal_id).fetch_data()
+            is_valid = Validator(anime, episode).validate()
+
+    @staticmethod
+    def before_add_to_db(translation):
+        print('_before_add_to_db')
+        if translation.get_kind == 'sub':
+            translation.set_kind('subtitles')
+        elif translation.get_kind == 'raw':
+            translation.set_kind('raw')
+        elif translation.get_kind == 'voice':
+            translation.set_kind('fandub')
+        else:
+            translation.set_kind('unknown')
+
+        if translation.get_lang == 'ru':
+            translation.set_lang('russian')
+        elif translation.get_lang == 'en':
+            translation.set_lang('english')
+        elif translation.get_lang == 'ja' or translation.get_lang == 'jp':
+            translation.set_lang('original')
+        else:
+            translation['typeLang'] = 'unknown'
+
+        if translation.get_quality == 'tv':
+            translation.set_quality('tv')
+        elif translation.get_quality == 'bd':
+            translation.set_quality('bd')
+        elif translation.get_quality == 'dvd':
+            translation.set_quality('dvd')
+        else:
+            translation.set_quality('unknown')
+
+        if translation.get_type == 'opening':
+            translation.set_type('op')
+        elif translation.get_type == 'ending':
+            translation.set_type('ed')
+        elif translation.get_type == 'preview':
+            translation.set_type('pv')
+        else:
+            translation.set_type('other')
+
+        return translation
+
+    def run(self):
+        while True:
+            try:
+
+                print('ok')
+                print(datetime.datetime.now())
+                print('_______________________')
+            except Exception:
+                print('Exception')
+                continue
 """
 
 class Bot(object):
